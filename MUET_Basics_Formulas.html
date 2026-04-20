@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUET Basics + New MCQs</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f4f8;min-height:100vh}
+.app{max-width:800px;margin:0 auto;padding:1rem}
+.header{background:linear-gradient(135deg,#1565C0,#0d47a1);color:white;padding:1.3rem;border-radius:14px;margin-bottom:1rem;text-align:center}
+.header h1{font-size:21px;margin-bottom:3px}
+.header p{font-size:12px;opacity:.85}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.nav-tab{padding:8px 16px;border-radius:99px;border:2px solid #1565C0;font-size:13px;font-weight:bold;cursor:pointer;background:white;color:#1565C0;transition:all .2s}
+.nav-tab.active,.nav-tab:hover{background:#1565C0;color:white}
+
+/* SECTIONS */
+.section{display:none}
+.section.active{display:block}
+
+/* FORMULA CARDS */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:1rem}
+.f-card{background:white;border-radius:10px;padding:1rem;box-shadow:0 2px 6px rgba(0,0,0,.08);border-left:4px solid #1565C0}
+.f-subject{font-size:11px;font-weight:bold;color:#1565C0;margin-bottom:4px;text-transform:uppercase}
+.f-formula{font-size:17px;font-weight:bold;color:#222;margin-bottom:4px;font-family:monospace}
+.f-name{font-size:13px;color:#555}
+.f-trick{font-size:12px;color:#E65100;margin-top:6px;background:#FFF3E0;padding:4px 8px;border-radius:6px}
+
+/* MCQ SECTION */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.stat-box{background:white;border-radius:10px;padding:.7rem;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.stat-num{font-size:22px;font-weight:bold;color:#1565C0}
+.stat-num.green{color:#2e7d32}
+.stat-label{font-size:11px;color:#666;margin-top:2px}
+.prog-wrap{background:#ddd;border-radius:99px;height:7px;margin-bottom:1rem;overflow:hidden}
+.prog-fill{height:100%;background:#1565C0;border-radius:99px;transition:width .4s}
+
+.subject-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.s-tab{padding:7px 14px;border-radius:99px;border:2px solid #1565C0;font-size:12px;font-weight:bold;cursor:pointer;background:white;color:#1565C0}
+.s-tab.active{background:#1565C0;color:white}
+
+.q-card{background:white;border-radius:12px;padding:1.2rem;margin-bottom:.8rem;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.badge{background:#E3F2FD;color:#1565C0;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:bold}
+.diff-badge{padding:3px 8px;border-radius:99px;font-size:10px;font-weight:bold}
+.diff-easy{background:#E8F5E9;color:#2e7d32}
+.diff-medium{background:#FFF3E0;color:#E65100}
+.diff-hard{background:#FFEBEE;color:#c62828}
+.q-text{font-size:15px;color:#222;line-height:1.6;margin-bottom:.9rem;font-weight:500}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{text-align:left;padding:10px 14px;border-radius:8px;border:2px solid #ddd;background:white;color:#333;font-size:14px;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#1565C0;background:#E3F2FD}
+.opt.correct{background:#E8F5E9;border-color:#2e7d32;color:#1b5e20;font-weight:bold}
+.opt.wrong{background:#FFEBEE;border-color:#c62828;color:#b71c1c}
+.trick-box{display:none;margin-top:.9rem;padding:11px 14px;background:#FFF8E1;border-left:4px solid #F9A825;border-radius:6px}
+.trick-title{font-size:12px;font-weight:bold;color:#E65100;margin-bottom:5px}
+.trick-body{font-size:13px;color:#444;line-height:1.7}
+.shortcut-pill{display:inline-block;margin-top:7px;background:#1565C0;color:white;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:bold}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem}
+.q-counter{font-size:12px;color:#888}
+.next-btn{display:none;padding:9px 20px;border-radius:8px;border:none;background:#1565C0;color:white;font-size:14px;font-weight:bold;cursor:pointer}
+.score-card{background:white;border-radius:12px;padding:2.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.score-big{font-size:56px;font-weight:bold;color:#1565C0}
+.score-msg{font-size:16px;color:#444;margin:.5rem 0 1rem}
+.retry-btn{padding:10px 26px;border-radius:8px;border:none;background:#1565C0;color:white;font-size:14px;font-weight:bold;cursor:pointer;margin:4px}
+.back-btn{padding:10px 26px;border-radius:8px;border:2px solid #1565C0;background:white;color:#1565C0;font-size:14px;font-weight:bold;cursor:pointer;margin:4px}
+.hidden{display:none!important}
+
+/* FORMULA SEARCH */
+.search-box{width:100%;padding:10px 14px;border-radius:10px;border:2px solid #ddd;font-size:14px;margin-bottom:1rem}
+.search-box:focus{outline:none;border-color:#1565C0}
+.section-title{font-size:16px;font-weight:bold;color:#1565C0;margin-bottom:.8rem;padding-bottom:6px;border-bottom:2px solid #E3F2FD}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <h1>MUET Complete Preparation Kit</h1>
+  <p>Important Formulas + New MCQs + Basics — Everything in one place</p>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('formulas')">📋 Key Formulas</button>
+  <button class="nav-tab" onclick="showSection('mcq')">🎯 New MCQs</button>
+  <button class="nav-tab" onclick="showSection('basics')">📖 Quick Basics</button>
+</div>
+
+<!-- ===== FORMULAS SECTION ===== -->
+<div class="section active" id="sec-formulas">
+  <input class="search-box" type="text" placeholder="Search formula (e.g. KE, Ohm, log...)" oninput="filterFormulas(this.value)" id="fsearch">
+  <div id="formula-container"></div>
+</div>
+
+<!-- ===== MCQ SECTION ===== -->
+<div class="section" id="sec-mcq">
+  <div class="subject-tabs">
+    <button class="s-tab active" onclick="goSub(0)">⚡ Physics</button>
+    <button class="s-tab" onclick="goSub(1)">📐 Maths</button>
+    <button class="s-tab" onclick="goSub(2)">🧪 Chemistry</button>
+    <button class="s-tab" onclick="goSub(3)">📝 English</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="s-att">0/20</div><div class="stat-label">Attempted</div></div>
+    <div class="stat-box"><div class="stat-num green" id="s-cor">0</div><div class="stat-label">Correct</div></div>
+    <div class="stat-box"><div class="stat-num" id="s-pct">0%</div><div class="stat-label">Score</div></div>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+  <div id="quiz-area"></div>
+  <div id="score-area" class="hidden"></div>
+</div>
+
+<!-- ===== BASICS SECTION ===== -->
+<div class="section" id="sec-basics">
+  <div id="basics-container"></div>
+</div>
+
+</div>
+
+<script>
+// ============ FORMULAS DATA ============
+const FORMULAS = [
+  // PHYSICS
+  {sub:"Physics",name:"Newton's 2nd Law",formula:"F = ma",trick:"F=ma: Force, mass, acceleration — alphabetical!"},
+  {sub:"Physics",name:"Kinetic Energy",formula:"KE = ½mv²",trick:"Must have BOTH ½ AND v² — both or wrong!"},
+  {sub:"Physics",name:"Potential Energy",formula:"PE = mgh",trick:"Spot 'h' (height) in options = PE formula"},
+  {sub:"Physics",name:"Work Done",formula:"W = Fd cosθ",trick:"cosθ always included — angle matters!"},
+  {sub:"Physics",name:"Power",formula:"P = W/t",trick:"Faster work = more power → time on bottom"},
+  {sub:"Physics",name:"Ohm's Law",formula:"V = IR",trick:"VIR like a word — V=I×R"},
+  {sub:"Physics",name:"Momentum",formula:"p = mv",trick:"p for momentum: mass × velocity"},
+  {sub:"Physics",name:"Density",formula:"D = M/V",trick:"Mass on TOP, Volume on bottom"},
+  {sub:"Physics",name:"Wave Speed",formula:"v = λf",trick:"MULTIPLY wavelength and frequency"},
+  {sub:"Physics",name:"Gravitational Acc.",formula:"g = 9.8 m/s²",trick:"Trap = 8.9 (reversed). Correct = 9.8"},
+  {sub:"Physics",name:"Speed of Light",formula:"c = 3×10⁸ m/s",trick:"Exponent is 8. Always 8!"},
+  {sub:"Physics",name:"Speed of Sound",formula:"v = 343 m/s (air)",trick:"Pattern 3-4-3. Easy to remember!"},
+  // MATHS
+  {sub:"Maths",name:"Pythagorean Identity",formula:"sin²θ + cos²θ = 1",trick:"Always 1. No exception ever!"},
+  {sub:"Maths",name:"Pythagorean Theorem",formula:"a² + b² = c²",trick:"Test: 3²+4²=5² → 9+16=25 ✓"},
+  {sub:"Maths",name:"Quadratic Formula",formula:"x = (-b ± √(b²-4ac)) / 2a",trick:"Three checks: -b, ± symbol, /2a"},
+  {sub:"Maths",name:"Power Rule (Derivative)",formula:"d/dx xⁿ = nxⁿ⁻¹",trick:"Bring power down, minus 1. x⁵→5x⁴"},
+  {sub:"Maths",name:"Derivative of sin(x)",formula:"d/dx sin(x) = cos(x)",trick:"Circle: sin→cos→-sin→-cos→sin"},
+  {sub:"Maths",name:"Derivative of cos(x)",formula:"d/dx cos(x) = -sin(x)",trick:"cos→-sin (negative sign!)"},
+  {sub:"Maths",name:"Integral of cos(x)",formula:"∫cos(x)dx = sin(x)+C",trick:"Reverse derivative. Always +C!"},
+  {sub:"Maths",name:"Binomial Square",formula:"(a+b)² = a²+2ab+b²",trick:"2ab in middle — most forgotten!"},
+  {sub:"Maths",name:"Log Base 10",formula:"log₁₀(10ⁿ) = n",trick:"Count zeros → that's the log!"},
+  {sub:"Maths",name:"Area of Circle",formula:"A = πr²",trick:"Area=r squared (2D). Circ=2πr (1D)"},
+  {sub:"Maths",name:"Slope Formula",formula:"m = (y₂-y₁)/(x₂-x₁)",trick:"Rise/Run. Y on top, X on bottom!"},
+  {sub:"Maths",name:"tan(45°)",formula:"tan(45°) = 1",trick:"Equal sides → equal/equal = 1"},
+  {sub:"Maths",name:"sin(30°)",formula:"sin(30°) = 1/2",trick:"sin(30)=½, sin(45)=√2/2, sin(60)=√3/2"},
+  {sub:"Maths",name:"Determinant 2×2",formula:"det[[a,b],[c,d]] = ad-bc",trick:"Cross multiply then subtract!"},
+  // CHEMISTRY
+  {sub:"Chemistry",name:"Moles Formula",formula:"moles = mass / molar mass",trick:"DIVIDE to get moles!"},
+  {sub:"Chemistry",name:"OIL RIG Rule",formula:"Oxidation=Loss, Reduction=Gain",trick:"OIL RIG — most important chem trick!"},
+  {sub:"Chemistry",name:"Water Formula",formula:"H₂O",trick:"2H + 1O. Not H₂O₂ (that's peroxide)!"},
+  {sub:"Chemistry",name:"Ammonia",formula:"NH₃",trick:"N + 3H. Fertiliser smell!"},
+  {sub:"Chemistry",name:"Glucose",formula:"C₆H₁₂O₆",trick:"6-12-6 pattern. Easy!"},
+  {sub:"Chemistry",name:"Rust",formula:"Fe₂O₃",trick:"2-3 pattern: 2 Fe, 3 O"},
+  {sub:"Chemistry",name:"Carbon Dioxide",formula:"CO₂",trick:"1 Carbon, 2 Oxygens"},
+  {sub:"Chemistry",name:"Sulphuric Acid",formula:"H₂SO₄",trick:"Strongest common acid. Car battery!"},
+  {sub:"Chemistry",name:"Baking Soda",formula:"NaHCO₃",trick:"Has H. Washing Soda=Na₂CO₃ (no H)"},
+  {sub:"Chemistry",name:"Ethanol",formula:"C₂H₅OH",trick:"Eth=2C. Meth=1C, Prop=3C, But=4C"},
+  {sub:"Chemistry",name:"Avogadro's Number",formula:"6.022 × 10²³",trick:"Exponent is 23. Not 22, not 24!"},
+  {sub:"Chemistry",name:"Ozone",formula:"O₃",trick:"O₂=breathe. O₃=ozone layer"},
+];
+
+// ============ MCQ DATA (NEW QUESTIONS) ============
+const MCQ = {
+  Physics:[
+    {q:"A car of mass 1000 kg accelerates at 2 m/s². What force acts on it?",opts:["500 N","1000 N","2000 N","3000 N"],ans:2,diff:"easy",
+    trick:"CONCEPT: Use F=ma directly. F = 1000 × 2 = 2000 N. Whenever mass and acceleration are given — multiply them for force!",shortcut:"F=ma → just multiply mass × acceleration. 1000×2=2000 N!"},
+
+    {q:"Which of the following is a scalar quantity?",opts:["Force","Velocity","Acceleration","Speed"],ans:3,diff:"easy",
+    trick:"CONCEPT: Scalar = magnitude only (no direction). Vector = magnitude + direction. Speed = how fast (no direction). Velocity = speed WITH direction. Speed is scalar!",shortcut:"Speed=scalar (no direction). Velocity=vector (has direction). Key difference!"},
+
+    {q:"The unit of work is the same as the unit of:",opts:["Force","Power","Energy","Momentum"],ans:2,
+    diff:"easy",trick:"CONCEPT: Work = Force × distance = Joules. Energy is also measured in Joules. Work done ON an object = energy transferred TO it. Same unit = same concept.",shortcut:"Work unit = Energy unit = Joule (J). They are essentially the same thing!"},
+
+    {q:"When an object is in free fall, which force acts on it?",opts:["No force","Gravity only","Gravity + air resistance","Magnetic force"],ans:1,diff:"easy",
+    trick:"CONCEPT: 'Free fall' by definition means ONLY gravity acts — no air resistance, no other forces. In reality there is air resistance, but 'free fall' in physics = gravity only.",shortcut:"Free fall = gravity ONLY. The word 'free' means no other forces!"},
+
+    {q:"Increasing the length of a wire — its resistance will:",opts:["Decrease","Stay same","Increase","Become zero"],ans:2,diff:"medium",
+    trick:"CONCEPT: R = ρL/A. Resistance is PROPORTIONAL to length. Longer wire = more material for electrons to pass through = more resistance. Like a longer pipe with more friction.",shortcut:"Longer wire → more resistance. R ∝ L. They increase together!"},
+
+    {q:"A wave has frequency 50 Hz and wavelength 4 m. What is its speed?",opts:["12.5 m/s","54 m/s","200 m/s","46 m/s"],ans:2,diff:"medium",
+    trick:"CONCEPT: v = λf. Speed = wavelength × frequency. Just multiply! 4 × 50 = 200 m/s. When you see λ and f given — always multiply them.",shortcut:"v=λf. Multiply: 4×50=200 m/s. Always multiply wavelength×frequency!"},
+
+    {q:"An object at rest stays at rest unless acted upon by a force. This is Newton's:",opts:["1st Law","2nd Law","3rd Law","Law of Gravitation"],ans:0,diff:"easy",
+    trick:"CONCEPT: Newton's 1st Law = Law of Inertia = objects resist change in motion. 'At rest stays at rest, in motion stays in motion' — unless a force acts.",shortcut:"Rest stays rest = Newton's 1st Law = Inertia. No force needed to stay still!"},
+
+    {q:"The process of converting AC to DC is called:",opts:["Amplification","Rectification","Induction","Modulation"],ans:1,diff:"medium",
+    trick:"CONCEPT: Rectification = making current flow in one direction (DC). 'Rectify' means to correct or straighten. AC alternates direction — rectifier straightens it to DC.",shortcut:"AC→DC = Rectification. 'Rectify' = straighten the current!"},
+
+    {q:"Which type of lens is used in a magnifying glass?",opts:["Concave","Convex","Plane","Bifocal"],ans:1,diff:"easy",
+    trick:"CONCEPT: Magnifying glass makes things appear BIGGER = converges light = CONVEX lens. Concave lens makes things smaller (used for short-sight correction). Convex = magnify!",shortcut:"Magnifying glass = Convex lens. Convex=bigger. Concave=smaller!"},
+
+    {q:"What is the power of a machine that does 500 J of work in 10 seconds?",opts:["5 W","50 W","500 W","5000 W"],ans:1,diff:"easy",
+    trick:"CONCEPT: P = W/t. Power = Work ÷ Time. 500 ÷ 10 = 50 W. Whenever work and time are given — divide work by time for power.",shortcut:"P=W/t. Divide: 500÷10=50 W. Work divided by time!"},
+
+    {q:"What happens to pressure when depth in a liquid increases?",opts:["Decreases","Stays same","Increases","Becomes zero"],ans:2,diff:"easy",
+    trick:"CONCEPT: P = ρgh. Pressure depends on depth (h). Deeper = more liquid above pushing down = more pressure. That's why deep sea is under massive pressure.",shortcut:"Deeper=more pressure. P=ρgh. Depth and pressure increase together!"},
+
+    {q:"Which colour of light has the highest frequency?",opts:["Red","Green","Yellow","Violet"],ans:3,diff:"medium",
+    trick:"CONCEPT: VIBGYOR (Violet to Red). Violet has shortest wavelength = highest frequency. Red has longest wavelength = lowest frequency. Remember: V (violet) = very high frequency!",shortcut:"VIBGYOR: Violet=highest freq, Red=lowest. V for Very high, R for Really low!"},
+
+    {q:"Total internal reflection occurs when light goes from:",opts:["Air to glass","Glass to air at critical angle","Water to vacuum","Vacuum to water"],ans:1,diff:"hard",
+    trick:"CONCEPT: Total internal reflection happens when light travels from denser to rarer medium AND hits at or beyond the critical angle. Glass→air (denser to rarer) at critical angle = total reflection.",shortcut:"Dense→Rare medium at critical angle = Total Internal Reflection!"},
+
+    {q:"The SI unit of electric charge is:",opts:["Ampere","Volt","Coulomb","Watt"],ans:2,diff:"easy",
+    trick:"CONCEPT: Charles-Augustin de Coulomb studied electric charge — unit named after him. Current (Ampere) = charge per second. Charge = Coulombs. 1A = 1 Coulomb/second.",shortcut:"Electric charge = Coulomb (C). Current = Ampere = Coulombs per second!"},
+
+    {q:"An echo is produced due to:",opts:["Refraction","Reflection","Diffraction","Absorption"],ans:1,diff:"easy",
+    trick:"CONCEPT: Echo = sound bouncing back from a hard surface = REFLECTION of sound. When sound hits a wall and bounces back to your ears, you hear the echo.",shortcut:"Echo = reflection of sound. Sound bounces back = echo!"},
+
+    {q:"What is the efficiency of a machine that takes 1000 J and gives 800 J useful work?",opts:["80%","20%","800%","125%"],ans:0,diff:"medium",
+    trick:"CONCEPT: Efficiency = (useful output / total input) × 100. 800/1000 × 100 = 80%. Always: output on top, input on bottom, multiply by 100 for percentage.",shortcut:"Efficiency = (output/input)×100. 800/1000×100 = 80%!"},
+
+    {q:"Which of the following is NOT a renewable energy source?",opts:["Solar","Wind","Natural gas","Hydroelectric"],ans:2,diff:"easy",
+    trick:"CONCEPT: Renewable = naturally replenished (sun, wind, water flow). Non-renewable = runs out (coal, oil, natural gas, nuclear). Natural gas is fossil fuel = non-renewable.",shortcut:"Solar/Wind/Hydro=renewable. Coal/Oil/Gas=non-renewable. Gas is non-renewable!"},
+
+    {q:"What is the focal length of a plane mirror?",opts:["Zero","Infinity","Equal to radius","Negative"],ans:1,diff:"hard",
+    trick:"CONCEPT: A plane (flat) mirror has no curvature — parallel rays never converge after reflection. The focal point is at infinity. Unlike curved mirrors, it doesn't focus light.",shortcut:"Plane mirror focal length = infinity. Flat surface = no focusing = ∞!"},
+
+    {q:"A 60W bulb runs for 2 hours. How much energy does it use?",opts:["30 J","120 J","432000 J","720 J"],ans:2,diff:"medium",
+    trick:"CONCEPT: Energy = Power × Time. But time must be in SECONDS! 2 hours = 2×3600 = 7200 s. Energy = 60 × 7200 = 432000 J. Always convert hours to seconds!",shortcut:"E=P×t. Convert hours→seconds first! 60W × 7200s = 432000 J"},
+
+    {q:"The splitting of white light into colours by a prism is called:",opts:["Reflection","Refraction","Dispersion","Diffraction"],ans:2,diff:"easy",
+    trick:"CONCEPT: Dispersion = white light splitting into VIBGYOR colours. Each colour has different wavelength → bends at different angle in prism → rainbow appears. Dispersion!",shortcut:"White light splits into colours = Dispersion. Rainbow = dispersion!"},
+  ],
+
+  Maths:[
+    {q:"Solve: 2x + 6 = 14. Find x.",opts:["3","4","5","6"],ans:1,diff:"easy",
+    trick:"CONCEPT: Isolate x. Step 1: subtract 6 from both sides → 2x = 8. Step 2: divide by 2 → x = 4. Always: move numbers to one side, variable to the other.",shortcut:"2x+6=14 → 2x=8 → x=4. Move 6, then divide by 2!"},
+
+    {q:"What is 15% of 200?",opts:["15","25","30","35"],ans:2,diff:"easy",
+    trick:"CONCEPT: Percentage trick: 15% = 15/100 × 200 = 30. Quick method: 10% of 200 = 20. 5% = 10. So 15% = 20+10 = 30. Break percentage into 10% and 5%!",shortcut:"10% of 200=20, 5% of 200=10. Add: 15%=30. Break-and-add method!"},
+
+    {q:"The sum of first n natural numbers formula is:",opts:["n²","n(n+1)/2","n(n-1)/2","2n"],ans:1,diff:"medium",
+    trick:"CONCEPT: Sum of 1+2+3+...+n = n(n+1)/2. Test: 1+2+3+4+5 = 15. Formula: 5×6/2 = 15 ✓. This formula appears in MUET frequently!",shortcut:"Sum 1 to n = n(n+1)/2. Test with 5: 5×6/2=15. Always works!"},
+
+    {q:"If a triangle has angles 60° and 70°, the third angle is:",opts:["50°","60°","70°","80°"],ans:0,diff:"easy",
+    trick:"CONCEPT: Sum of triangle angles = 180°. Third angle = 180 - 60 - 70 = 50°. Always: add known angles, subtract from 180.",shortcut:"3rd angle = 180 - (sum of other two). 180-60-70=50°!"},
+
+    {q:"Simplify: (x³)(x⁴)",opts:["x⁷","x¹²","x","x⁻¹"],ans:0,diff:"easy",
+    trick:"CONCEPT: When multiplying same base — ADD the exponents. x³ × x⁴ = x^(3+4) = x⁷. Simple addition of powers!",shortcut:"Same base multiplication = ADD powers. x³×x⁴=x⁷!"},
+
+    {q:"What is the value of sin(90°)?",opts:["0","1/2","√3/2","1"],ans:3,diff:"easy",
+    trick:"CONCEPT: Key trig values: sin(0°)=0, sin(30°)=½, sin(45°)=√2/2, sin(60°)=√3/2, sin(90°)=1. At 90°, sin reaches its maximum = 1.",shortcut:"sin(0°)=0, sin(90°)=1, cos(0°)=1, cos(90°)=0. Opposites at 0 and 90!"},
+
+    {q:"A line has slope 2 and passes through (0,3). Its equation is:",opts:["y=2x","y=2x+3","y=3x+2","y=x+2"],ans:1,diff:"medium",
+    trick:"CONCEPT: Slope-intercept form: y = mx + c. m = slope = 2. c = y-intercept = 3 (where line crosses y-axis). So y = 2x + 3. Just plug slope and intercept in!",shortcut:"y=mx+c. Slope=m=2, y-intercept=c=3. So y=2x+3!"},
+
+    {q:"What is ²⁷/³ equal to?",opts:["3","6","9","27"],ans:2,diff:"easy",
+    trick:"CONCEPT: 27/3 = 9. Simple division. But if written as 27^(1/3) that would be cube root = 3. Make sure you read what's being asked. 27÷3 = 9.",shortcut:"27÷3=9. Basic division!"},
+
+    {q:"The volume of a cube with side 3 cm is:",opts:["9 cm³","18 cm³","27 cm³","81 cm³"],ans:2,diff:"easy",
+    trick:"CONCEPT: Volume of cube = side³ = s × s × s. 3 × 3 × 3 = 27 cm³. For cube: cube the side length!",shortcut:"Cube volume = s³. Side=3 → 3³=27 cm³!"},
+
+    {q:"What is the HCF of 12 and 18?",opts:["3","4","6","9"],ans:2,diff:"easy",
+    trick:"CONCEPT: HCF = Highest Common Factor. Factors of 12: 1,2,3,4,6,12. Factors of 18: 1,2,3,6,9,18. Common: 1,2,3,6. Highest = 6.",shortcut:"HCF(12,18)=6. List factors, find highest common one!"},
+
+    {q:"If log₂(x) = 3, then x = ?",opts:["6","8","9","16"],ans:1,diff:"medium",
+    trick:"CONCEPT: log₂(x)=3 means 2³=x. Log asks 'what power?' — flip it: base^power = number. 2³ = 8.",shortcut:"log₂(x)=3 → 2³=x → x=8. Flip: base^power=number!"},
+
+    {q:"What is the distance formula between (0,0) and (3,4)?",opts:["5","7","12","25"],ans:0,diff:"medium",
+    trick:"CONCEPT: Distance = √(x₂-x₁)² + (y₂-y₁)²) = √(3²+4²) = √(9+16) = √25 = 5. This is the 3-4-5 Pythagorean triple!",shortcut:"Distance = √(Δx²+Δy²). 3-4-5 triangle: √(9+16)=√25=5!"},
+
+    {q:"What is the remainder when 17 is divided by 5?",opts:["1","2","3","4"],ans:1,diff:"easy",
+    trick:"CONCEPT: 17 ÷ 5 = 3 remainder 2 (since 5×3=15, 17-15=2). Remainder = what's left after division. 17=5×3+2, remainder=2.",shortcut:"17÷5=3 with remainder 2. 5×3=15, 17-15=2!"},
+
+    {q:"cos(0°) = ?",opts:["0","1/2","√3/2","1"],ans:3,diff:"easy",
+    trick:"CONCEPT: cos(0°)=1, cos(90°)=0. Cosine starts at 1 and decreases. sin starts at 0 and increases. They are opposite! At 0°: sin=0, cos=1. At 90°: sin=1, cos=0.",shortcut:"cos(0°)=1, cos(90°)=0. Opposite of sin! sin(0°)=0, sin(90°)=1!"},
+
+    {q:"A ratio 3:5. If the first part is 12, what is the second?",opts:["15","16","20","25"],ans:2,diff:"medium",
+    trick:"CONCEPT: 3:5 ratio. First part = 3 units = 12. So 1 unit = 4. Second part = 5 units = 5×4 = 20. Find the value of 1 unit first, then multiply.",shortcut:"1 unit = 12÷3 = 4. Second part = 5×4 = 20. Find unit value first!"},
+
+    {q:"What is 2³ × 2²?",opts:["2⁵","2⁶","4⁵","2¹"],ans:0,diff:"easy",
+    trick:"CONCEPT: Same base multiplication: ADD the exponents. 2³ × 2² = 2^(3+2) = 2⁵ = 32. Same rule as with x: x³×x²=x⁵.",shortcut:"Same base multiply = add exponents. 2³×2²=2⁵!"},
+
+    {q:"The median of 3, 7, 9, 15, 21 is:",opts:["7","9","15","21"],ans:1,diff:"easy",
+    trick:"CONCEPT: Median = middle value when arranged in order. 5 numbers → middle is 3rd value. 3,7,9,15,21 → middle = 9. For odd count: (n+1)/2 th value.",shortcut:"Median = middle value. 5 numbers → 3rd = 9!"},
+
+    {q:"Expand (x-3)²:",opts:["x²-9","x²-6x+9","x²+6x+9","x²-6x-9"],ans:1,diff:"medium",
+    trick:"CONCEPT: (a-b)² = a²-2ab+b². Here a=x, b=3. So x²-2(x)(3)+3² = x²-6x+9. Middle term is NEGATIVE because (a-b). Sign change from (a+b)²!",shortcut:"(a-b)²=a²-2ab+b². Negative middle term! x²-6x+9"},
+
+    {q:"What is the LCM of 4 and 6?",opts:["8","10","12","24"],ans:2,diff:"easy",
+    trick:"CONCEPT: LCM = Lowest Common Multiple. Multiples of 4: 4,8,12,16... Multiples of 6: 6,12,18... First common = 12. Or use: LCM = (4×6)/HCF(4,6) = 24/2 = 12.",shortcut:"LCM(4,6)=12. Lowest common multiple — first number both divide into!"},
+
+    {q:"A car travels 120 km in 2 hours. What is its average speed?",opts:["60 km/h","50 km/h","70 km/h","80 km/h"],ans:0,diff:"easy",
+    trick:"CONCEPT: Speed = Distance ÷ Time. 120 ÷ 2 = 60 km/h. Classic formula. Distance and time given → divide to get speed.",shortcut:"Speed = Distance/Time. 120÷2=60 km/h!"},
+  ],
+
+  Chemistry:[
+    {q:"Which gas is produced when zinc reacts with dilute HCl?",opts:["Oxygen","Chlorine","Hydrogen","Carbon dioxide"],ans:2,diff:"easy",
+    trick:"CONCEPT: Zn + 2HCl → ZnCl₂ + H₂. When metals react with dilute acids, HYDROGEN gas is produced. This is a standard reaction tested every year!",shortcut:"Metal + dilute acid → HYDROGEN gas. Always H₂!"},
+
+    {q:"The number of protons in Sodium (Na) is:",opts:["10","11","12","23"],ans:1,diff:"easy",
+    trick:"CONCEPT: Atomic number = proton count. Na is atomic number 11. Count: H(1)...Ne(10), Na(11). Sodium comes after Neon. Atomic number 11 = 11 protons.",shortcut:"Na = atomic number 11 = 11 protons. Na always 11!"},
+
+    {q:"Which of the following is an example of a physical change?",opts:["Burning wood","Rusting iron","Melting ice","Cooking an egg"],ans:2,diff:"easy",
+    trick:"CONCEPT: Physical change = shape/state changes but composition stays same. Reversible! Melting ice → water → ice again = physical. Burning, rusting, cooking = chemical (new substances formed).",shortcut:"Physical = reversible, same substance. Melting ice=physical. Burning=chemical!"},
+
+    {q:"Acids turn blue litmus paper to:",opts:["Red","Green","Yellow","Colourless"],ans:0,diff:"easy",
+    trick:"CONCEPT: Acid = RED litmus. Base = BLUE litmus. Easy memory: Acid turns blue to RED. Base turns red to BLUE. Opposite colours!",shortcut:"Acid→RED litmus. Base→BLUE litmus. A=R, B=B. Opposite!"},
+
+    {q:"What type of bond is formed between Na and Cl in NaCl?",opts:["Covalent","Ionic","Metallic","Hydrogen"],ans:1,diff:"medium",
+    trick:"CONCEPT: Ionic bond = formed between METAL and NON-METAL by electron transfer. Na (metal) gives electron to Cl (non-metal). Metal+nonmetal = always ionic bond!",shortcut:"Metal + Non-metal = Ionic bond. Na+Cl=NaCl=ionic. Always!"},
+
+    {q:"The chemical symbol of Gold is:",opts:["Go","Gd","Au","Ag"],ans:2,diff:"easy",
+    trick:"CONCEPT: Gold symbol = Au (from Latin 'Aurum'). Silver = Ag (Argentum). Iron = Fe (Ferrum). Lead = Pb (Plumbum). These Latin-origin symbols are commonly tested.",shortcut:"Gold=Au. Silver=Ag. Iron=Fe. Lead=Pb. Latin names!"},
+
+    {q:"Which is the most abundant gas in the atmosphere?",opts:["Oxygen","Carbon dioxide","Nitrogen","Argon"],ans:2,diff:"easy",
+    trick:"CONCEPT: Atmosphere: Nitrogen=78%, Oxygen=21%, Argon=1%, CO₂=0.04%. Nitrogen is BY FAR the most abundant. Oxygen is second. Students often guess oxygen — it's nitrogen!",shortcut:"Atmosphere: N₂=78%, O₂=21%. Nitrogen is most abundant, not oxygen!"},
+
+    {q:"When acid reacts with base, the products are:",opts:["Acid + water","Salt + water","Salt + acid","Base + water"],ans:1,diff:"easy",
+    trick:"CONCEPT: Acid + Base → Salt + Water. This is called Neutralisation. Classic example: HCl + NaOH → NaCl + H₂O. Salt and water always produced!",shortcut:"Acid + Base → Salt + Water. Neutralisation! Always these two products!"},
+
+    {q:"Electroplating uses which process?",opts:["Electrolysis","Distillation","Filtration","Oxidation"],ans:0,diff:"medium",
+    trick:"CONCEPT: Electroplating = coating an object with a thin layer of metal using electrical current = electrolysis. Electric current depositing metal = electrolysis!",shortcut:"Electroplating = Electrolysis. Electric current + metal deposition!"},
+
+    {q:"The number of covalent bonds in CH₄ (methane)?",opts:["1","2","3","4"],ans:3,diff:"easy",
+    trick:"CONCEPT: CH₄ has carbon bonded to 4 hydrogens. Each C-H = 1 covalent bond. Total = 4 covalent bonds. Carbon's valency = 4 → always forms 4 bonds!",shortcut:"CH₄: 4 C-H bonds = 4 covalent bonds. Carbon valency=4!"},
+
+    {q:"Which of these is a noble gas?",opts:["Nitrogen","Fluorine","Neon","Sodium"],ans:2,diff:"easy",
+    trick:"CONCEPT: Noble gases = Group 18. He, Ne, Ar, Kr, Xe, Rn. They are stable and don't react. Neon (Ne) is in this group. Nitrogen and Fluorine are reactive. Sodium is a metal.",shortcut:"Noble gases: He, Ne, Ar, Kr, Xe. NEON is the noble gas here!"},
+
+    {q:"What is the charge of a proton?",opts:["-1","0","+1","+2"],ans:2,diff:"easy",
+    trick:"CONCEPT: Proton = +1 charge. Electron = -1 charge. Neutron = 0 charge. These are the three sub-atomic particles and their charges. PEN trick: Proton+, Electron-, Neutron=0.",shortcut:"PEN: Proton=+1, Electron=-1, Neutron=0. Three particles, three charges!"},
+
+    {q:"Soap is an example of a:",opts:["Acid","Base","Salt","Neutral substance"],ans:1,diff:"medium",
+    trick:"CONCEPT: Soap is made by reacting fat/oil with a strong base (NaOH). Soap itself has basic/alkaline pH (around 9-10). It's an example of a base/alkaline substance.",shortcut:"Soap = basic/alkaline. Made from NaOH (base). pH around 9-10!"},
+
+    {q:"The formula of Carbon dioxide is:",opts:["CO","CO₂","C₂O","C₂O₃"],ans:1,diff:"easy",
+    trick:"CONCEPT: Carbon dioxide = 1 Carbon + 2 Oxygens = CO₂. 'Di' means two. Carbon MONoxide = CO (1 oxygen, toxic). CO₂ = what we breathe out. CO = dangerous gas.",shortcut:"Dioxide=2 oxygens=CO₂. Monoxide=1 oxygen=CO. Di=2, Mono=1!"},
+
+    {q:"Distillation is used to separate:",opts:["Insoluble solids from liquids","Miscible liquids with different boiling points","Immiscible liquids","Gases from solids"],ans:1,diff:"medium",
+    trick:"CONCEPT: Distillation separates liquids that MIX (miscible) but have different boiling points. One evaporates first, condenses, collected separately. Like separating alcohol and water.",shortcut:"Distillation = miscible liquids with different boiling points. They mix but boil differently!"},
+
+    {q:"What is the pH of a strong acid like HCl?",opts:["1","5","7","9"],ans:0,diff:"easy",
+    trick:"CONCEPT: pH 0-6 = acid. Strong acid = very low pH close to 0 or 1. HCl is a strong acid → pH around 1. pH 7 = neutral. pH 9 = alkaline.",shortcut:"Strong acid = pH close to 1. Stronger the acid, lower the pH!"},
+
+    {q:"Which of the following metals reacts violently with water?",opts:["Gold","Copper","Iron","Sodium"],ans:3,diff:"medium",
+    trick:"CONCEPT: Alkali metals (Na, K, Li) react VIOLENTLY with water. Sodium + water → NaOH + H₂ gas (explosive). Gold and copper don't react with water. Iron reacts slowly (rusting).",shortcut:"Alkali metals (Na, K, Li) + water = violent reaction. Sodium explodes in water!"},
+
+    {q:"An element with atomic number 6 has how many electrons?",opts:["4","5","6","8"],ans:2,diff:"easy",
+    trick:"CONCEPT: In a neutral atom, electrons = protons = atomic number. Atomic number 6 = 6 protons = 6 electrons. Simple! Atomic number directly gives electron count.",shortcut:"Neutral atom: electrons = atomic number = 6. Always equal!"},
+
+    {q:"Which of the following is used as a fuel in nuclear reactors?",opts:["Carbon","Uranium","Iron","Copper"],ans:1,diff:"easy",
+    trick:"CONCEPT: Nuclear reactors use URANIUM (U-235) as fuel for fission. Uranium's heavy nucleus splits releasing enormous energy. Carbon, iron, copper are not nuclear fuels.",shortcut:"Nuclear fuel = Uranium. Uranium fission = nuclear power plant energy!"},
+
+    {q:"Photosynthesis produces which gas?",opts:["Carbon dioxide","Nitrogen","Oxygen","Hydrogen"],ans:2,diff:"easy",
+    trick:"CONCEPT: Photosynthesis: CO₂ + H₂O + sunlight → glucose + O₂. Plants take in CO₂ and RELEASE OXYGEN. Opposite of respiration (which takes O₂ and releases CO₂).",shortcut:"Photosynthesis takes CO₂, releases O₂. Respiration: opposite!"},
+  ],
+
+  English:[
+    {q:"Choose the correct sentence:",opts:["She don't like milk","She doesn't like milk","She not like milk","She didn't likes milk"],ans:1,diff:"easy",
+    trick:"CONCEPT: 3rd person singular (she/he/it) + present tense negative = DOESN'T + base verb. 'She don't' = wrong. 'She doesn't like' = correct. Doesn't = does + not.",shortcut:"She/He/It + negative = DOESN'T + base verb. She doesn't like ✓"},
+
+    {q:"Which is the correct passive form of 'They are building a bridge'?",opts:["A bridge built","A bridge is being built","A bridge was built","A bridge has been built"],ans:1,diff:"medium",
+    trick:"CONCEPT: Present Continuous active → Present Continuous passive. is/am/are + being + past participle. 'Are building' → 'is being built'. 'Being' signals continuous passive.",shortcut:"Present continuous passive = is/am/are + being + past participle!"},
+
+    {q:"Synonym of 'Abundant'?",opts:["Scarce","Plentiful","Limited","Rare"],ans:1,diff:"easy",
+    trick:"CONCEPT: Abundant = more than enough, plentiful. Scarce and Rare = opposite (eliminate first). Limited = not enough. Only Plentiful = same as abundant.",shortcut:"Abundant=Plentiful=lots of. Scarce/Rare=opposite. Eliminate opposites!"},
+
+    {q:"Choose correct spelling:",opts:["Accomodation","Occurance","Occurrence","Occurance"],ans:2,diff:"medium",
+    trick:"CONCEPT: Occurrence = double C + double R. 'Oc-CUR-Rence'. Two letters doubled in the middle. Like 'accommodation' (double C + double M). Spot the double letters!",shortcut:"Occurrence = double C + double R. Oc-CUR-Rence. Double double!"},
+
+    {q:"Antonym of 'Brave'?",opts:["Bold","Courageous","Cowardly","Strong"],ans:2,diff:"easy",
+    trick:"CONCEPT: Brave = having courage. Bold and Courageous = SAME (eliminate). Strong = different concept. Cowardly = lacking courage = opposite of brave.",shortcut:"Brave↔Cowardly. Eliminate Bold/Courageous (same meaning). Cowardly=opposite!"},
+
+    {q:"He said, 'I am happy.' — Report this in indirect speech:",opts:["He said that he was happy","He said that I am happy","He says that he is happy","He said that he is happy"],ans:0,diff:"medium",
+    trick:"CONCEPT: Indirect speech rules: (1) 'said' stays 'said'. (2) 'I' → 'he'. (3) Tense shifts back: 'am' (present) → 'was' (past). All three changes together!",shortcut:"Indirect: change pronoun I→he, shift tense am→was. He said he WAS happy!"},
+
+    {q:"Choose the correct preposition: 'She is married ___ a doctor.'",opts:["with","by","to","from"],ans:2,diff:"easy",
+    trick:"CONCEPT: 'Married TO someone' is the fixed preposition. 'Married with' is wrong (common mistake). 'Married to a doctor' = correct. Always TO after married!",shortcut:"Married TO. Fixed phrase. Never 'married with'. Always TO!"},
+
+    {q:"Synonym of 'Enormous'?",opts:["Tiny","Huge","Average","Small"],ans:1,diff:"easy",
+    trick:"CONCEPT: Enormous = very very large. Huge = also very large = synonym. Tiny and Small = opposite. Average = medium. Eliminate opposites, pick the large option.",shortcut:"Enormous=Huge. Both mean very large. Eliminate small/tiny opposites!"},
+
+    {q:"Which sentence uses the correct tense?",opts:["I am studying since morning","I have been studying since morning","I was studying since morning","I studied since morning"],ans:1,diff:"medium",
+    trick:"CONCEPT: 'Since' with ongoing action = Present Perfect Continuous. Formula: have/has + been + verb-ing. 'Since morning' tells us it started in the past and continues now.",shortcut:"SINCE + ongoing = have been doing. 'Since morning' → have been studying!"},
+
+    {q:"Antonym of 'Guilty'?",opts:["Criminal","Blamed","Innocent","Ashamed"],ans:2,diff:"easy",
+    trick:"CONCEPT: Guilty = having done wrong, responsible for crime. Innocent = not guilty, free of blame = opposite. Criminal and Blamed are similar to guilty. Ashamed = feeling bad.",shortcut:"Guilty↔Innocent. Court says: guilty OR innocent. Opposites in law!"},
+
+    {q:"Choose the correct word: 'The _____ of the book is interesting.' (main idea)",opts:["Theme","Topic","Them","Themes"],ans:0,diff:"medium",
+    trick:"CONCEPT: Theme = main idea or central message of a book/story. Topic = general subject. Here 'main idea/message' = Theme. Singular = Theme (not Themes — sentence has 'the').",shortcut:"Theme = main idea of book/story. 'The theme' = singular. Most common meaning!"},
+
+    {q:"Which is grammatically correct?",opts:["Neither of them are ready","Neither of them is ready","Neither of them were ready","Neither of them have ready"],ans:1,diff:"hard",
+    trick:"CONCEPT: 'Neither' = singular → singular verb. 'Neither of them IS ready'. Like 'each', 'everyone', 'neither', 'either' — all singular. Don't be tricked by 'them' (plural) nearby.",shortcut:"Neither=singular=IS. Each/Neither/Either/Everyone = always singular verb!"},
+
+    {q:"Synonym of 'Obsolete'?",opts:["Modern","Outdated","Current","New"],ans:1,diff:"medium",
+    trick:"CONCEPT: Obsolete = no longer used, out of date. Outdated = old-fashioned = same meaning. Modern/Current/New = opposites. Eliminate the 'new/modern' options.",shortcut:"Obsolete=Outdated=no longer used. Eliminate modern/new (opposites)!"},
+
+    {q:"Fill in blank: 'It has been raining ___ three hours.'",opts:["since","for","from","during"],ans:1,diff:"medium",
+    trick:"CONCEPT: 'Since' = from a specific POINT in time (since 3pm, since morning). 'For' = a DURATION/period of time (for 3 hours, for two days). Three hours = duration = FOR.",shortcut:"FOR = duration (for 3 hours). SINCE = point in time (since 3pm). Duration=FOR!"},
+
+    {q:"The boy ran ___ the street.",opts:["across","between","among","beside"],ans:0,diff:"easy",
+    trick:"CONCEPT: 'Across' = from one side to the other side. Running across a street = crossing from side A to side B. Between = two things. Among = many things. Beside = next to.",shortcut:"Across = crossing from one side to other. Running across the street!"},
+
+    {q:"Antonym of 'Expand'?",opts:["Grow","Enlarge","Contract","Increase"],ans:2,diff:"easy",
+    trick:"CONCEPT: Expand = to grow larger. Grow, Enlarge, Increase = all same as expand (eliminate). Contract = to become smaller = opposite of expand.",shortcut:"Expand↔Contract. Grow/Enlarge/Increase=same. Contract=opposite!"},
+
+    {q:"Choose correct sentence:",opts:["The committee have decided","The committee has decided","The committee are decided","The committee were decided"],ans:1,diff:"medium",
+    trick:"CONCEPT: Collective nouns (committee, team, group, jury) acting as ONE unit = singular verb. 'The committee HAS decided' — committee acting together = singular. HAS not HAVE!",shortcut:"Collective nouns (committee/team) acting as one = singular verb HAS!"},
+
+    {q:"Synonym of 'Fragile'?",opts:["Strong","Delicate","Sturdy","Tough"],ans:1,diff:"easy",
+    trick:"CONCEPT: Fragile = easily broken, delicate. Delicate = the same meaning. Strong, Sturdy, Tough = all opposite meanings. Eliminate the strong/tough options.",shortcut:"Fragile=Delicate=easily broken. Eliminate strong/sturdy/tough (opposites)!"},
+
+    {q:"'Despite' is followed by:",opts:["Despite of her efforts","Despite her efforts","Despite that her efforts","Despite she tried"],ans:1,diff:"medium",
+    trick:"CONCEPT: 'Despite' is NEVER followed by 'of'. This is the most common mistake. Despite + noun/noun phrase (not 'of', not 'that', not clause directly). 'Despite her efforts' = correct.",shortcut:"Despite + noun phrase. NEVER 'despite of'. 'Despite of' is always WRONG!"},
+
+    {q:"Which word is an adverb in: 'She sings beautifully.'",opts:["She","sings","beautifully","none"],ans:2,diff:"easy",
+    trick:"CONCEPT: Adverb = modifies a verb (how, when, where). 'Beautifully' describes HOW she sings. Words ending in '-ly' are usually adverbs. Quickly, slowly, happily, beautifully = adverbs.",shortcut:"Beautifully = adverb. Words ending -ly = usually adverbs. Describes HOW!"},
+  ]
+};
+
+// ============ BASICS DATA ============
+const BASICS = [
+  {subject:"Physics",title:"Top 10 Physics Concepts",items:[
+    "Newton's 1st Law: Objects stay at rest or in motion unless force acts (Inertia)",
+    "Newton's 2nd Law: F = ma (Force = mass × acceleration)",
+    "Newton's 3rd Law: Every action has equal & opposite reaction",
+    "Work-Energy Theorem: Work done = change in kinetic energy",
+    "Conservation of Energy: Energy cannot be created or destroyed, only converted",
+    "Ohm's Law: V = IR (Voltage = Current × Resistance)",
+    "Electromagnetic Induction: Changing magnetic field induces electric current",
+    "Refraction: Light bends when moving between different mediums",
+    "Total Internal Reflection: Light reflects back when angle exceeds critical angle",
+    "Pressure in liquids: P = ρgh (increases with depth)"
+  ]},
+  {subject:"Maths",title:"Top 10 Maths Concepts",items:[
+    "Pythagorean Theorem: a²+b²=c² (right triangle). Test: 3-4-5",
+    "Pythagorean Identity: sin²θ + cos²θ = 1 (always!)",
+    "Standard Trig Values: sin(30°)=½, sin(45°)=√2/2, sin(60°)=√3/2",
+    "Power Rule: d/dx xⁿ = nxⁿ⁻¹ (bring power down, minus 1)",
+    "Derivative cycle: sin→cos→-sin→-cos→sin",
+    "Integration reverse: ∫cos=sin+C, ∫sin=-cos+C",
+    "Log rule: log(aⁿ)=n·log(a). log(1)=0. log(base)=1",
+    "Binomial: (a+b)²=a²+2ab+b². Don't forget the 2ab!",
+    "Quadratic formula: x=(-b±√(b²-4ac))/2a. Starts with -b!",
+    "Sum of angles: Triangle=180°, Quadrilateral=360°, Pentagon=540°"
+  ]},
+  {subject:"Chemistry",title:"Top 10 Chemistry Concepts",items:[
+    "OIL RIG: Oxidation Is Loss of electrons, Reduction Is Gain of electrons",
+    "RED CAT: REDuction at CAThode. AN OX: ANode = OXidation",
+    "Acid+Base → Salt+Water (Neutralisation). Always these products!",
+    "Metal+Dilute Acid → Salt + Hydrogen gas (H₂ always released)",
+    "Ionic bond: Metal + Non-metal (e.g., NaCl). Covalent: Non-metal + Non-metal",
+    "pH scale: 0-6=acid, 7=neutral, 8-14=base. Acid→red litmus. Base→blue litmus",
+    "Alkali metals (Na,K,Li) react VIOLENTLY with water, releasing H₂",
+    "Allotropes: Same element, different structure. Diamond+Graphite = both Carbon",
+    "Photosynthesis: CO₂+H₂O+light → glucose+O₂ (releases oxygen!)",
+    "Electrolysis: Electric current splits compounds. Used in electroplating"
+  ]},
+  {subject:"English",title:"Top 10 English Grammar Rules",items:[
+    "He/She/It + present tense = verb+S. 'She goes', 'He likes'. Never forget the S!",
+    "A/An rule: based on SOUND not spelling. 'An hour' (silent H = vowel sound)",
+    "SINCE = specific point in time. FOR = duration. Since 2020, for 3 years",
+    "Since/For + ongoing = Present Perfect Continuous (have been doing)",
+    "Despite + noun phrase. NEVER 'despite of'. Biggest grammar trap!",
+    "Uncountable nouns (news, hair, information, advice) = singular verb (is/has)",
+    "Collective nouns as one unit (team, committee, jury) = singular verb",
+    "Passive formula: Object + is/was/are + past participle + by + subject",
+    "Neither/Either/Each/Everyone = SINGULAR verb (despite seeming plural)",
+    "Fixed prepositions: Good AT, Responsible FOR, Interested IN, Afraid OF"
+  ]}
+];
+
+// ============ APP LOGIC ============
+let cur=0, qi=0, answered=false;
+let scores=[0,0,0,0], atts=[0,0,0,0], done=[false,false,false,false];
+const SUBS=["Physics","Maths","Chemistry","English"];
+
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// FORMULAS
+function buildFormulas(){
+  const container=document.getElementById('formula-container');
+  const grouped={Physics:[],Maths:[],Chemistry:[]};
+  FORMULAS.forEach(f=>grouped[f.sub]&&grouped[f.sub].push(f));
+  let html='';
+  ['Physics','Maths','Chemistry'].forEach(sub=>{
+    html+=`<div class="section-title" style="margin-top:1rem">${sub==='Physics'?'⚡':sub==='Maths'?'📐':'🧪'} ${sub} Formulas</div><div class="formula-grid" data-sub="${sub}">`;
+    grouped[sub].forEach(f=>{
+      html+=`<div class="f-card" data-name="${f.name.toLowerCase()} ${f.formula.toLowerCase()}">
+        <div class="f-subject">${f.sub}</div>
+        <div class="f-formula">${f.formula}</div>
+        <div class="f-name">${f.name}</div>
+        <div class="f-trick">${f.trick}</div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  container.innerHTML=html;
+}
+
+function filterFormulas(val){
+  const v=val.toLowerCase();
+  document.querySelectorAll('.f-card').forEach(card=>{
+    const text=card.dataset.name;
+    card.style.display=(!v||text.includes(v))?'':'none';
+  });
+}
+
+// BASICS
+function buildBasics(){
+  const container=document.getElementById('basics-container');
+  let html='';
+  BASICS.forEach(b=>{
+    html+=`<div style="background:white;border-radius:12px;padding:1.2rem;margin-bottom:1rem;box-shadow:0 2px 6px rgba(0,0,0,.08)">
+      <div class="section-title">${b.subject==='Physics'?'⚡':b.subject==='Maths'?'📐':b.subject==='Chemistry'?'🧪':'📝'} ${b.title}</div>
+      <ol style="margin-top:.8rem;padding-left:1.2rem">`;
+    b.items.forEach(item=>{
+      html+=`<li style="font-size:13px;color:#333;line-height:1.7;margin-bottom:4px">${item}</li>`;
+    });
+    html+='</ol></div>';
+  });
+  container.innerHTML=html;
+}
+
+// MCQ
+function qs(){return MCQ[SUBS[cur]];}
+
+function goSub(i){
+  cur=i;qi=0;answered=false;
+  document.querySelectorAll('.s-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  updateStats();render();
+}
+
+function updateStats(){
+  const total=qs().length;
+  const pct=atts[cur]>0?Math.round(scores[cur]/atts[cur]*100):0;
+  document.getElementById('s-att').textContent=atts[cur]+'/'+total;
+  document.getElementById('s-cor').textContent=scores[cur];
+  document.getElementById('s-pct').textContent=pct+'%';
+  document.getElementById('prog').style.width=(atts[cur]/total*100)+'%';
+}
+
+function render(){
+  const sa=document.getElementById('score-area'),qa=document.getElementById('quiz-area');
+  const total=qs().length;
+  if(done[cur]||qi>=total){
+    qa.classList.add('hidden');sa.classList.remove('hidden');
+    const pct=Math.round(scores[cur]/total*100);
+    const emoji=pct>=80?'🎉':pct>=60?'👍':'💪';
+    const msg=pct>=80?'Excellent! 80%+ achieved!':pct>=60?'Good! Practice more!':'Keep going! You can do it!';
+    sa.innerHTML=`<div class="score-card">
+      <div style="font-size:44px;margin-bottom:8px">${emoji}</div>
+      <div class="score-big">${scores[cur]}/${total}</div>
+      <div class="score-msg">${msg}</div>
+      <p style="font-size:13px;color:#888;margin-bottom:1.2rem">Score: ${pct}% — ${SUBS[cur]}</p>
+      <button class="retry-btn" onclick="resetSub()">Try Again</button>
+      <button class="back-btn" onclick="goSub((cur+1)%4)">Next Subject →</button>
+    </div>`;
+    return;
+  }
+  sa.classList.add('hidden');qa.classList.remove('hidden');
+  const q=qs()[qi];
+  const diffClass='diff-'+(q.diff||'medium');
+  const diffText=(q.diff||'medium').charAt(0).toUpperCase()+(q.diff||'medium').slice(1);
+  let html=`<div class="q-card">
+    <div class="q-meta">
+      <span class="badge">${SUBS[cur]}</span>
+      <span class="diff-badge ${diffClass}">${diffText}</span>
+      <span style="font-size:11px;color:#888">Q${qi+1}/${qs().length}</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="opts">`;
+  q.opts.forEach((o,i)=>{html+=`<button class="opt" id="o${i}" onclick="pick(${i})">${String.fromCharCode(65+i)}.&nbsp;${o}</button>`;});
+  html+=`</div>
+    <div class="trick-box" id="tb">
+      <div class="trick-title">💡 Concept + Trick</div>
+      <div class="trick-body">${q.trick}<br><br><span class="shortcut-pill">${q.shortcut}</span></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <span class="q-counter">${SUBS[cur]} — Q${qi+1}/${qs().length}</span>
+    <button class="next-btn" id="nb" onclick="nextQ()">Next →</button>
+  </div>`;
+  qa.innerHTML=html;
+}
+
+function pick(i){
+  if(answered)return;
+  answered=true;atts[cur]++;
+  const q=qs()[qi];
+  if(i===q.ans)scores[cur]++;
+  for(let j=0;j<q.opts.length;j++){
+    const b=document.getElementById('o'+j);
+    if(j===q.ans)b.classList.add('correct');
+    else if(j===i&&i!==q.ans)b.classList.add('wrong');
+    b.onclick=null;
+  }
+  document.getElementById('tb').style.display='block';
+  document.getElementById('nb').style.display='inline-block';
+  updateStats();
+}
+
+function nextQ(){qi++;answered=false;if(qi>=qs().length)done[cur]=true;render();}
+function resetSub(){qi=0;answered=false;scores[cur]=0;atts[cur]=0;done[cur]=false;updateStats();render();}
+
+buildFormulas();
+buildBasics();
+updateStats();
+render();
+</script>
+</body>
+</html>
